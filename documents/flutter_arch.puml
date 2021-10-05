@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+node "Presentation" {
+    [Widgets] -> [ViewModel]
+    [Widgets] <- [ViewModel]
+}
+
+node "Domain" {
+    [UseCases]
+    [Entities]
+}
+
+node "Data" {
+    [Repositories] --> [DAO]
+    [Repositories] --> [Services]
+    [Services] --> cloud
+    [DAO] --> database
+}
+
+[ViewModel] --> [UseCases]
+[ViewModel] <-- [UseCases]
+[UseCases] --> [Repositories]
+[Repositories] --> [Entities]
+
+@enduml

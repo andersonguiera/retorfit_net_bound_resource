@@ -1,0 +1,21 @@
+@startuml
+package "Business" {
+    [domain]
+    [data]
+}
+
+package "Presentation" {
+    [Login]
+    [Others features]
+}
+
+package "Core" {
+    [Navigation service]
+    [Dialog service]
+    [Toast service]
+}
+
+Presentation --> Core
+Presentation --> domain
+domain --> data
+@enduml
