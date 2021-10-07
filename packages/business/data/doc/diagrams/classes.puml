@@ -1,0 +1,129 @@
+@startuml
+'https://plantuml.com/class-diagram
+skinparam << extension >> {
+    stereotypeCBackgroundColor orchid
+    spotChar X
+}
+
+package "domain.repository" <<rectangle>> {
+    interface UserRepository{
+        +Future<List<User>> getUsers()
+        +Future<User> getUser(dynamic id)
+        +Future<User> saveUser(User user)
+        +Future<void> deleteUser(dynamic id)
+    }
+}
+
+package "domain.model" <<rectangle>> {
+    class Address
+    class Company
+    class Geo
+    class User
+}
+
+package "data.datasource.remote" <<rectangle>> {
+    abstract class UserRepositoryRemoteServices {
+        +Future<UserDTO> getUser(dynamic id)
+        +Future<List<UserDTO>> getUsers()
+        +Future<UserDTO> createUser(UserDTO user)
+        +Future<UserDTO> updateUser(UserDTO user)
+        +Future<void> deleteUser(dynamic id)
+    }
+}
+
+package "data.repository" <<rectangle>> {
+    class UserRepositoryRemoteImpl implements UserRepository
+}
+
+package "data.datasource.remote.DTO" <<rectangle>> {
+    class GeoDTO {
+        +String lat
+        +String lng
+
+        +Map<String,dynamic> toJson()
+        +GeoDTO fromJson()
+    }
+
+    class AddressDTO {
+      +String street
+      +String suite
+      +String city
+      +String zipCode
+
+      +Map<String,dynamic> toJson()
+      +AddressDTO fromJson()
+    }
+
+    class CompanyDTO {
+      +String name
+      +String catchPhrase
+      +String bs
+
+      +Map<String,dynamic> toJson()
+      +CompanyDTO fromJson()
+    }
+
+    class UserDTO {
+      +dynamic id
+      +String name
+      +String userName
+      +String email
+      +String phone
+      +String website
+
+      +Map<String,dynamic> toJson()
+      +UserDTO fromJson()
+    }
+
+    UserDTO --> "0..1" CompanyDTO
+    UserDTO *--> AddressDTO
+    AddressDTO *--> GeoDTO
+}
+
+UserRepositoryRemoteImpl O--> UserRepositoryRemoteServices : service
+
+package "data.mapper" <<rectangle>> {
+    class GeoMapper <<extension>>{
+        +GeoDTO toDTO()
+    }
+    class GeoDTOMapper <<extension>> {
+        +Geo toModel()
+    }
+
+    class AddressMapper <<extension>> {
+        +AddressDTO toDTO()
+    }
+
+    class AddressDTOMapper <<extension>> {
+        +Address toModel()
+    }
+
+    class CompanyMapper <<extension>> {
+        +CompanyDTO toDTO()
+    }
+
+    class CompanyDTOMapper <<extension>> {
+        +Company toModel()
+    }
+
+    class UserMapper <<extension>> {
+        +UserDTO toDTO()
+    }
+
+    class UserDTOMapper <<extension>> {
+        +User toModel()
+    }
+
+    note "**<<extension>>** stereotype\nrepresents dart extension\nof class\n**extended** relationship shows\ndirection of this relationship.\nEx.:\nAddress a = Address(...);\nAddressDTO aDTO = a.toDTO();" as extension_note
+
+    GeoDTO ..> GeoDTOMapper : extended
+    Geo ..> GeoMapper : extended
+    AddressDTO ..> AddressDTOMapper : extended
+    Address ..> AddressMapper : extended
+    Company ..> CompanyMapper : extended
+    CompanyDTO ..> CompanyDTOMapper : extended
+    User ..> UserMapper : extended
+    UserDTO ..> UserDTOMapper : extended
+}
+
+@enduml

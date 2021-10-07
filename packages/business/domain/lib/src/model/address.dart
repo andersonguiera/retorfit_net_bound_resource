@@ -1,6 +1,6 @@
-class _Geo {
+class Geo {
 
-  const _Geo(this.lat, this.lng);
+  const Geo(this.lat, this.lng);
 
   final String lat;
   final String lng;
@@ -14,5 +14,5 @@ class Address {
   final String suite;
   final String city;
   final String zipCode;
-  final _Geo geo;
+  final Geo geo;
 }
