@@ -1,30 +1,28 @@
+import 'package:data/src/di/locator.dart';
 import 'package:data/src/exceptions/exceptions.dart';
 import 'package:domain/domain.dart';
 import 'package:test/test.dart';
-import 'package:data/data.dart';
-import 'package:dio/dio.dart';
-import 'package:data/remote.dart';
+
 
 void main() {
+  configureDependencies();
+
   test('Try to find a user which doesn\'t exist - NotFoundException', () async {
-    final UserRepository repository =
-        UserRepositoryRemoteImpl(UserRepositoryRemoteServices(Dio()));
+    final UserRepository repository = getIt<UserRepository>();
 
     expect(() async => await repository.getUser(-178),
         throwsA(const TypeMatcher<NotFoundException>()));
   });
 
   test('Try to find a user which id is a string - NotFoundException', () async {
-    final UserRepository repository =
-    UserRepositoryRemoteImpl(UserRepositoryRemoteServices(Dio()));
+    final UserRepository repository = getIt<UserRepository>();
 
     expect(() async => await repository.getUser('a'),
         throwsA(const TypeMatcher<NotFoundException>()));
   });
 
   test('Test CRUD User', () async {
-    final UserRepository repository =
-    UserRepositoryRemoteImpl(UserRepositoryRemoteServices(Dio()));
+    final UserRepository repository = getIt<UserRepository>();
 
     const user = User(
       null,
@@ -59,8 +57,7 @@ void main() {
   });
 
   test('Test a list of User', () async {
-    final UserRepository repository =
-        UserRepositoryRemoteImpl(UserRepositoryRemoteServices(Dio()));
+    final UserRepository repository = getIt<UserRepository>();
     final users = await repository.getUsers();
 
     expect(users.length, 20);

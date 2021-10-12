@@ -3,7 +3,9 @@ import 'package:domain/domain.dart';
 import 'package:dio/dio.dart';
 import 'package:data/src/mapper/user_mapper.dart';
 import 'package:data/src/datasource/remote/user_repository_remote_service.dart';
+import 'package:injectable/injectable.dart';
 
+@Injectable(as: UserRepository)
 class UserRepositoryRemoteImpl implements UserRepository {
   UserRepositoryRemoteImpl(this._service);
 

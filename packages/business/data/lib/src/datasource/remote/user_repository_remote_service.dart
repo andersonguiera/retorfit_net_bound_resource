@@ -1,13 +1,17 @@
 import 'package:data/src/datasource/remote/api_config.dart';
 import 'package:data/src/datasource/remote/dto/rest_response.dart';
+import 'package:injectable/injectable.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart' hide Headers;
 import 'dto/user_dto.dart';
 part 'user_repository_remote_service.g.dart';
 
+@injectable
 @RestApi(baseUrl: 'https://gorest.co.in/public/v1')
 abstract class UserRepositoryRemoteServices {
-  factory UserRepositoryRemoteServices(Dio dio, {String baseUrl}) =
+
+  @factoryMethod
+  factory UserRepositoryRemoteServices(Dio dio, {@factoryParam String? baseUrl}) =
   _UserRepositoryRemoteServices;
 
   @GET('/users/{id}')
