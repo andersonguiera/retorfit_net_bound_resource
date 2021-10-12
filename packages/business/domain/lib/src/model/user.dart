@@ -1,34 +1,23 @@
-import 'address.dart';
-import 'company.dart';
 
 class User {
-  const User(this.id, this.name, this.userName, this.email, this.phone,
-      this.website, this.address, this.company);
+  const User(this.id, this.name, this.email, this.gender, this.status);
 
   final dynamic id;
   final String name;
-  final String userName;
   final String email;
-  final String phone;
-  final String website;
-  final Address? address;
-  final Company? company;
+  final String gender;
+  final String status;
 
   User copyWith(
           {String? name,
-          String? userName,
           String? email,
-          String? phone,
-          String? website,
-          Address? address,
-          Company? company}) =>
+          String? gender,
+          String? status,
+          }) =>
       User(
           id,
           name ?? this.name,
-          userName ?? this.userName,
           email ?? this.email,
-          phone ?? this.phone,
-          website ?? this.website,
-          address ?? this.address,
-          company ?? this.company);
+          gender ?? this.gender,
+          status ?? this.status,);
 }

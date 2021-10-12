@@ -5,125 +5,140 @@ skinparam << extension >> {
     spotChar X
 }
 
-package "domain.repository" <<rectangle>> {
-    interface UserRepository{
-        +Future<List<User>> getUsers()
-        +Future<User> getUser(dynamic id)
-        +Future<User> saveUser(User user)
-        +Future<void> deleteUser(dynamic id)
+skinparam groupInheritance 3
+
+namespace dart{
+    namespace core {
+        class Exception
     }
 }
 
-package "domain.model" <<rectangle>> {
-    class Address
-    class Company
-    class Geo
-    class User
-}
-
-package "data.datasource.remote" <<rectangle>> {
-    abstract class UserRepositoryRemoteServices {
-        +Future<UserDTO> getUser(dynamic id)
-        +Future<List<UserDTO>> getUsers()
-        +Future<UserDTO> createUser(UserDTO user)
-        +Future<UserDTO> updateUser(UserDTO user)
-        +Future<void> deleteUser(dynamic id)
+namespace domain {
+    namespace model {
+        class User {
+            +String name
+            +String name
+        }
+    }
+    namespace repository {
+        interface UserRepository{
+            +Future<List<User>> getUsers({int? page})
+            +Future<User> getUser(dynamic id)
+            +Future<User> saveUser(User user)
+            +Future<void> deleteUser(dynamic id)
+        }
     }
 }
 
-package "data.repository" <<rectangle>> {
-    class UserRepositoryRemoteImpl implements UserRepository
+namespace data{
+    namespace datasource{
+        namespace remote{
+            namespace DTO {
+                class UserDTO {
+                  +dynamic id
+                  +String name
+                  +String email
+                  +String gender
+                  +String status
+
+                  +Map<String,dynamic> toJson()
+                  +UserDTO fromJson(Map<String, dynamic> json)
+                }
+
+                class Links {
+                  +String? previous
+                  +String current
+                  +String? next
+
+                  +Links fromJson(Map<String, dynamic> json)
+                  +Map<String, dynamic> toJson()
+                }
+
+                class Pagination {
+                  +int total
+                  +int pages
+                  +int page
+                  +int limit
+                  +Links links
+                  +Pagination fromJson(Map<String, dynamic> json)
+                  +Map<String, dynamic> toJson()
+                }
+
+                class MetaData {
+                  +Pagination pagination;
+                  +MetaData fromJson(Map<String, dynamic> json)
+                  +Map<String, dynamic> toJson()
+                }
+
+                class RestResponse < T > {
+                  + MetaData? meta;
+                  + T data;
+                  +RestResponse fromJson(Map<String, dynamic> json)
+                  Map<String, dynamic> toJson()
+                }
+
+                Pagination *--> Links
+                MetaData *--> Pagination
+                RestResponse *--> MetaData
+            }
+
+            abstract class UserRepositoryRemoteServices {
+                +Future<RestResponse<UserDTO>> getUser(dynamic id)
+                +Future<RestResponse<List<UserDTO>>> getUsers({int? page})
+                +Future<RestResponse<UserDTO>> createUser(UserDTO user)
+                +Future<RestResponse<UserDTO>> updateUser(UserDTO user)
+                +Future<void> deleteUser(dynamic id)
+            }
+
+            class ApiConfig {
+                +{static} String token
+                +{static} String tokenType
+                +{static} String authorization
+            }
+
+            UserRepositoryRemoteServices -- ApiConfig : > is configured
+            data.repository.UserRepositoryRemoteImpl O--> UserRepositoryRemoteServices : service
+        }
+    }
+
+    namespace exceptions{
+        class DataException implements dart.core.Exception {
+            -String? message
+            -String prefix
+            +String fancyError
+        }
+
+        class BadRequestException extends DataException
+        class UnauthorisedException extends DataException
+        class ForbiddenException extends DataException
+        class NotFoundException extends DataException
+        class FetchDataException extends DataException
+    }
+
+    namespace repository {
+        class UserRepositoryRemoteImpl implements domain.repository.UserRepository {
+            -AppException _handleDioError(DioError error)
+            -AppException _handleError(Object error)
+        }
+    }
+
+    namespace mapper {
+        class UserMapper <<extension>> {
+            +UserDTO toDTO()
+        }
+
+        class UserDTOMapper <<extension>> {
+            +User toModel()
+        }
+
+        note "**<<extension>>** stereotype\nrepresents dart extension\nof class\n**extended** relationship shows\ndirection of this relationship.\nEx.:\nUser u = User(params);\nUserDTO uDTO = u.toDTO();" as extension_note
+
+        domain.model.User ..> UserMapper : extended
+        data.datasource.remote.DTO.UserDTO ..> UserDTOMapper : extended
+    }
+
+    "data.repository" ..> "data.exceptions"
+    "data.repository" ..> "data.mapper"
+
 }
-
-package "data.datasource.remote.DTO" <<rectangle>> {
-    class GeoDTO {
-        +String lat
-        +String lng
-
-        +Map<String,dynamic> toJson()
-        +GeoDTO fromJson()
-    }
-
-    class AddressDTO {
-      +String street
-      +String suite
-      +String city
-      +String zipCode
-
-      +Map<String,dynamic> toJson()
-      +AddressDTO fromJson()
-    }
-
-    class CompanyDTO {
-      +String name
-      +String catchPhrase
-      +String bs
-
-      +Map<String,dynamic> toJson()
-      +CompanyDTO fromJson()
-    }
-
-    class UserDTO {
-      +dynamic id
-      +String name
-      +String userName
-      +String email
-      +String phone
-      +String website
-
-      +Map<String,dynamic> toJson()
-      +UserDTO fromJson()
-    }
-
-    UserDTO --> "0..1" CompanyDTO
-    UserDTO *--> AddressDTO
-    AddressDTO *--> GeoDTO
-}
-
-UserRepositoryRemoteImpl O--> UserRepositoryRemoteServices : service
-
-package "data.mapper" <<rectangle>> {
-    class GeoMapper <<extension>>{
-        +GeoDTO toDTO()
-    }
-    class GeoDTOMapper <<extension>> {
-        +Geo toModel()
-    }
-
-    class AddressMapper <<extension>> {
-        +AddressDTO toDTO()
-    }
-
-    class AddressDTOMapper <<extension>> {
-        +Address toModel()
-    }
-
-    class CompanyMapper <<extension>> {
-        +CompanyDTO toDTO()
-    }
-
-    class CompanyDTOMapper <<extension>> {
-        +Company toModel()
-    }
-
-    class UserMapper <<extension>> {
-        +UserDTO toDTO()
-    }
-
-    class UserDTOMapper <<extension>> {
-        +User toModel()
-    }
-
-    note "**<<extension>>** stereotype\nrepresents dart extension\nof class\n**extended** relationship shows\ndirection of this relationship.\nEx.:\nAddress a = Address(...);\nAddressDTO aDTO = a.toDTO();" as extension_note
-
-    GeoDTO ..> GeoDTOMapper : extended
-    Geo ..> GeoMapper : extended
-    AddressDTO ..> AddressDTOMapper : extended
-    Address ..> AddressMapper : extended
-    Company ..> CompanyMapper : extended
-    CompanyDTO ..> CompanyDTOMapper : extended
-    User ..> UserMapper : extended
-    UserDTO ..> UserDTOMapper : extended
-}
-
 @enduml

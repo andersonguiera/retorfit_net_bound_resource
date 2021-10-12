@@ -9,25 +9,15 @@ part of 'user_dto.dart';
 UserDTO _$UserDTOFromJson(Map<String, dynamic> json) => UserDTO(
       json['id'],
       json['name'] as String,
-      json['username'] as String,
       json['email'] as String,
-      json['phone'] as String,
-      json['website'] as String,
-      json['address'] == null
-          ? null
-          : AddressDTO.fromJson(json['address'] as Map<String, dynamic>),
-      json['company'] == null
-          ? null
-          : CompanyDTO.fromJson(json['company'] as Map<String, dynamic>),
+      json['gender'] as String,
+      json['status'] as String,
     );
 
 Map<String, dynamic> _$UserDTOToJson(UserDTO instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'username': instance.userName,
       'email': instance.email,
-      'phone': instance.phone,
-      'website': instance.website,
-      'address': instance.address,
-      'company': instance.company,
+      'gender': instance.gender,
+      'status': instance.status,
     };

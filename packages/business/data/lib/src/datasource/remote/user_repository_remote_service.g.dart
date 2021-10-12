@@ -8,7 +8,7 @@ part of 'user_repository_remote_service.dart';
 
 class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
   _UserRepositoryRemoteServices(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'https://jsonplaceholder.typicode.com/';
+    baseUrl ??= 'https://gorest.co.in/public/v1';
   }
 
   final Dio _dio;
@@ -16,66 +16,76 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
   String? baseUrl;
 
   @override
-  Future<UserDTO> getUser(id) async {
+  Future<RestResponse<UserDTO>> getUser(id) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<UserDTO>(
+        _setStreamType<RestResponse<UserDTO>>(
             Options(method: 'GET', headers: <String, dynamic>{}, extra: _extra)
                 .compose(_dio.options, '/users/$id',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = UserDTO.fromJson(_result.data!);
+    final value = RestResponse<UserDTO>.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<List<UserDTO>> getUsers() async {
+  Future<RestResponse<List<UserDTO>>> getUsers(page) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<List<dynamic>>(
-        _setStreamType<List<UserDTO>>(
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<RestResponse<List<UserDTO>>>(
             Options(method: 'GET', headers: <String, dynamic>{}, extra: _extra)
-                .compose(_dio.options, '/users',
+                .compose(_dio.options, '/users?page=$page',
                     queryParameters: queryParameters, data: _data)
                 .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    var value = _result.data!
-        .map((dynamic i) => UserDTO.fromJson(i as Map<String, dynamic>))
-        .toList();
+    final value = RestResponse<List<UserDTO>>.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<UserDTO> createUser(user) async {
+  Future<RestResponse<UserDTO>> createUser(user) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(user.toJson());
     final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<UserDTO>(
-            Options(method: 'POST', headers: <String, dynamic>{}, extra: _extra)
-                .compose(_dio.options, '/users',
-                    queryParameters: queryParameters, data: _data)
-                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = UserDTO.fromJson(_result.data!);
+        _setStreamType<RestResponse<UserDTO>>(Options(
+                method: 'POST',
+                headers: <String, dynamic>{
+                  r'Content-Type': 'application/json',
+                  r'Authorization': 'Bearer '
+                },
+                extra: _extra,
+                contentType: 'application/json')
+            .compose(_dio.options, '/users',
+                queryParameters: queryParameters, data: _data)
+            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = RestResponse<UserDTO>.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<UserDTO> updateUser(id, user) async {
+  Future<RestResponse<UserDTO>> updateUser(id, user) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(user.toJson());
     final _result = await _dio.fetch<Map<String, dynamic>>(
-        _setStreamType<UserDTO>(Options(
-                method: 'PATCH', headers: <String, dynamic>{}, extra: _extra)
+        _setStreamType<RestResponse<UserDTO>>(Options(
+                method: 'PATCH',
+                headers: <String, dynamic>{
+                  r'Content-Type': 'application/json',
+                  r'Authorization': 'Bearer '
+                },
+                extra: _extra,
+                contentType: 'application/json')
             .compose(_dio.options, '/users/$id',
                 queryParameters: queryParameters, data: _data)
             .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    final value = UserDTO.fromJson(_result.data!);
+    final value = RestResponse<UserDTO>.fromJson(_result.data!);
     return value;
   }
 
@@ -84,11 +94,17 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    await _dio.fetch<void>(_setStreamType<void>(
-        Options(method: 'DELETE', headers: <String, dynamic>{}, extra: _extra)
-            .compose(_dio.options, '/users/$id',
-                queryParameters: queryParameters, data: _data)
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    await _dio.fetch<void>(_setStreamType<void>(Options(
+            method: 'DELETE',
+            headers: <String, dynamic>{
+              r'Content-Type': 'application/json',
+              r'Authorization': 'Bearer '
+            },
+            extra: _extra,
+            contentType: 'application/json')
+        .compose(_dio.options, '/users/$id',
+            queryParameters: queryParameters, data: _data)
+        .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
     return null;
   }
 
