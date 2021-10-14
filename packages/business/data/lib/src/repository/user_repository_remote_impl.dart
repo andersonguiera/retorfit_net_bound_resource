@@ -12,11 +12,17 @@ class UserRepositoryRemoteImpl implements UserRepository {
   final UserRepositoryRemoteServices _service;
 
   @override
-  Future<List<User>> getUsers({int? page}) async {
+  Future<Paginated<User>> getUsers({int? page}) async {
     try {
       var response = await _service.getUsers(page ?? 1);
       var usersDTO = response.data;
-      return usersDTO.map((e) => e.toModel()).toList();
+      var pagination = response.meta!.pagination;
+      return Paginated<User>(
+          total: pagination.total,
+          size: pagination.size,
+          pages: pagination.pages,
+          page: pagination.page,
+          elements: usersDTO.map((e) => e.toModel()).toList());
     } catch (error) {
       throw _handleError(error);
     }
@@ -84,7 +90,7 @@ class UserRepositoryRemoteImpl implements UserRepository {
   }
 
   DataException _handleError(Object error) {
-    if(error is DioError) {
+    if (error is DioError) {
       return _handleDioError(error);
     } else {
       return FetchDataException('Erro inesperado: ${error.toString()}');

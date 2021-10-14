@@ -21,12 +21,13 @@ class Links {
 @JsonSerializable()
 class Pagination {
 
-  const Pagination(this.total, this.pages, this.page, this.limit, this.links);
+  const Pagination(this.total, this.pages, this.page, this.size, this.links);
 
   final int total;
   final int pages;
   final int page;
-  final int limit;
+  @JsonKey(name: 'limit')
+  final int size;
   final Links links;
 
   factory Pagination.fromJson(Map<String, dynamic> json) =>

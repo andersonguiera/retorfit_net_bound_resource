@@ -137,8 +137,8 @@ namespace data{
         data.datasource.remote.DTO.UserDTO ..> UserDTOMapper : extended
     }
 
-    "data.repository" ..> "data.exceptions"
-    "data.repository" ..> "data.mapper"
+    "data.repository" ..> "data.exceptions" : depends
+    "data.repository" ..> "data.mapper" : depends
 
 }
 @enduml

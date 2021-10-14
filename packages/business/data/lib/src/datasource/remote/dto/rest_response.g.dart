@@ -31,7 +31,7 @@ Map<String, dynamic> _$PaginationToJson(Pagination instance) =>
       'total': instance.total,
       'pages': instance.pages,
       'page': instance.page,
-      'limit': instance.limit,
+      'limit': instance.size,
       'links': instance.links,
     };
 

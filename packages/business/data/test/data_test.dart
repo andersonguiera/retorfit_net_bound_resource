@@ -58,8 +58,8 @@ void main() {
 
   test('Test a list of User', () async {
     final UserRepository repository = getIt<UserRepository>();
-    final users = await repository.getUsers();
+    final page = await repository.getUsers();
 
-    expect(users.length, 20);
+    expect(page.elements.length, 20);
   });
 }

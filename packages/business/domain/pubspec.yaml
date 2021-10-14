@@ -10,11 +10,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  injectable: any
+  get_it: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  test: any
   flutter_lints: ^1.0.0
+  injectable_generator: any
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
