@@ -1,0 +1,77 @@
+@startuml
+'https://plantuml.com/class-diagram
+Title Diagram class of usecase package
+header Updated by Anderson Guiera\non October, 19th 2021
+
+note as package_indicators
+Usecase package
+
+|= indicator |= description |= value |
+| Nc | number of classes | 3 |
+| Na | number of abstract classes | 0 |
+| A | level of abstraction\n <math>A=Na/Nc</math> | 0 |
+end note
+
+namespace domain {
+    namespace model {
+        class User{
+            +final dynamic id
+            +final String name
+            +final String email
+            +final String gender
+            +final String status
+            +{static} User empty
+
+            +User copyWith({String? name, String? email, String? gender, String? status})
+        }
+
+        class Paginated<T> {
+            +final int total
+            +final int size
+            +final int pages
+            +final int page
+            +final List<T> elements
+        }
+    }
+    namespace usecase {
+        namespace common {
+            interface FindByNameUseCase<T> {
+                +Future<Paginated<T>> findByName(String name, {int page = 1})
+            }
+
+            interface FindByEmailUseCase<T> {
+                +Future<Paginated<T>> findByEmail(String email, {int page = 1})
+            }
+        }
+
+        namespace user {
+            interface GetUserByIdUseCase {
+                +Future<User> getUser(dynamic id)
+            }
+
+            interface GetUsersByPageUseCase {
+                +Future<Paginated<User>> getUsers({int? page})
+            }
+
+            interface FindUsersUseCase implements domain.usecase.common.FindByNameUseCase, domain.usecase.common.FindByEmailUseCase
+        }
+    }
+}
+
+    namespace usecase {
+        namespace user {
+            class GetUserByIdUseCaseImpl implements domain.usecase.user.GetUserByIdUseCase {
+                -final UserRepository repository
+            }
+
+            class GetUsersByPageUseCaseImpl implements domain.usecase.user.GetUsersByPageUseCase {
+                -final UserRepository repository
+            }
+
+            class FindUsersUseCaseImpl implements domain.usecase.user.FindUsersUseCase {
+                -final UserRepository repository
+            }
+        }
+    }
+
+@enduml

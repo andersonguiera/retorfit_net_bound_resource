@@ -20,6 +20,13 @@ abstract class UserRepositoryRemoteServices {
   @GET('/users?page={page}')
   Future<RestResponse<List<UserDTO>>> getUsers(@Path('page') int page);
 
+  @GET('/users?name={name}&page={page}')
+  Future<RestResponse<List<UserDTO>>> findByName(@Path('name') String name, @Path('page') int page);
+
+  @GET('/users?email={email}&page={page}')
+  Future<RestResponse<List<UserDTO>>> findByEmail(@Path('email') String email, @Path('page') int page);
+
+
   @POST('/users')
   @Headers(<String,dynamic>{
     'Content-Type':'application/json',

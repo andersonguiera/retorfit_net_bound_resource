@@ -8,6 +8,8 @@ class User {
   final String gender;
   final String status;
 
+  static const empty = User('','','','', '');
+
   User copyWith(
           {String? name,
           String? email,

@@ -46,6 +46,36 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
   }
 
   @override
+  Future<RestResponse<List<UserDTO>>> findByName(name, page) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<RestResponse<List<UserDTO>>>(
+            Options(method: 'GET', headers: <String, dynamic>{}, extra: _extra)
+                .compose(_dio.options, '/users?name=$name&page=$page',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = RestResponse<List<UserDTO>>.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<RestResponse<List<UserDTO>>> findByEmail(email, page) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<RestResponse<List<UserDTO>>>(
+            Options(method: 'GET', headers: <String, dynamic>{}, extra: _extra)
+                .compose(_dio.options, '/users?email=$email&page=$page',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = RestResponse<List<UserDTO>>.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<RestResponse<UserDTO>> createUser(user) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -56,8 +86,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
                 method: 'POST',
                 headers: <String, dynamic>{
                   r'Content-Type': 'application/json',
-                  r'Authorization':
-                      'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+                  r'Authorization': 'Bearer '
                 },
                 extra: _extra,
                 contentType: 'application/json')
@@ -79,8 +108,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
                 method: 'PATCH',
                 headers: <String, dynamic>{
                   r'Content-Type': 'application/json',
-                  r'Authorization':
-                      'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+                  r'Authorization': 'Bearer '
                 },
                 extra: _extra,
                 contentType: 'application/json')
@@ -100,8 +128,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
             method: 'DELETE',
             headers: <String, dynamic>{
               r'Content-Type': 'application/json',
-              r'Authorization':
-                  'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+              r'Authorization': 'Bearer '
             },
             extra: _extra,
             contentType: 'application/json')

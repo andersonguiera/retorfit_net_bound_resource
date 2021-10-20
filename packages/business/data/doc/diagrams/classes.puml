@@ -1,5 +1,17 @@
 @startuml
 'https://plantuml.com/class-diagram
+Title Diagram class of data package
+header Updated by Anderson Guiera\non October, 18th 2021
+
+note as package_indicators
+Data package
+
+|= indicator |= description |= value |
+| Nc | number of classes | 16 |
+| Na | number of abstract classes | 1 |
+| A | level of abstraction\n A = Na/Nc | 0.03 |
+end note
+
 skinparam << extension >> {
     stereotypeCBackgroundColor orchid
     spotChar X
@@ -15,18 +27,46 @@ namespace dart{
 
 namespace domain {
     namespace model {
-        class User {
-            +String name
-            +String name
+        class User{
+            +final dynamic id
+            +final String name
+            +final String email
+            +final String gender
+            +final String status
+            +{static} User empty
+
+            +User copyWith({String? name, String? email, String? gender, String? status})
+        }
+
+        class Paginated<T> {
+            +final int total
+            +final int size
+            +final int pages
+            +final int page
+            +final List<T> elements
         }
     }
     namespace repository {
-        interface UserRepository{
-            +Future<List<User>> getUsers({int? page})
+        interface UserRepository {
+            +Future<Paginated<User>> getUsers({int? page})
             +Future<User> getUser(dynamic id)
             +Future<User> saveUser(User user)
             +Future<void> deleteUser(dynamic id)
+            +Future<Paginated<User>> findByName(String name, {int page = 1})
+            +Future<Paginated<User>> findByEmail(String email, {int page = 1})
         }
+    }
+
+    namespace exceptions {
+        interface DomainException implements dart.core.Exception{
+          String get fancyMessage;
+          String get completeMessage;
+          StackTrace? get stackTrace;
+        }
+        interface UnauthorisedException implements DomainException
+        interface ForbiddenException implements DomainException
+        interface NotFoundException implements DomainException
+        interface IOException extends DomainException
     }
 }
 
@@ -102,17 +142,21 @@ namespace data{
     }
 
     namespace exceptions{
-        class DataException implements dart.core.Exception {
-            -String? message
-            -String prefix
-            +String fancyError
+        abstract class DataException implements domain.exceptions.DomainException {
+          -final String _prefix
+          -final String _message
+          -final StackTrace? _stackTrace
+          +String fancyMessage
+          +String completeMessage
+          +StackTrace? stackTrace
+          +String toString()
         }
 
-        class BadRequestException extends DataException
-        class UnauthorisedException extends DataException
-        class ForbiddenException extends DataException
-        class NotFoundException extends DataException
-        class FetchDataException extends DataException
+        class BadRequestException extends DataException implements domain.exceptions.IOException
+        class UnauthorisedException extends DataException implements domain.exceptions.UnauthorisedException
+        class ForbiddenException extends DataException implements domain.exceptions.ForbiddenException
+        class NotFoundException extends DataException implements domain.exceptions.NotFoundException
+        class FetchDataException extends DataException implements domain.exceptions.IOException
     }
 
     namespace repository {

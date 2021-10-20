@@ -1,7 +1,7 @@
-import 'package:domain/src/di/locator.dart';
-import 'package:domain/src/usecase/use_cases_users.dart';
-import 'package:test/test.dart';
+import 'package:usecase/di/locator.dart';
 import 'package:domain/domain.dart';
+import 'package:domain/usecase.dart';
+import 'package:test/test.dart';
 import 'mock_user_repository.dart';
 
 void main() {
@@ -19,9 +19,25 @@ void main() {
   test('GetUsersByPageUseCase', () async {
     final GetUsersByPageUseCase usecase = getIt<GetUsersByPageUseCase>();
     int pageNumber = 5;
-    final page = await usecase.getUsers(pageNumber);
+    final page = await usecase.getUsers(page: pageNumber);
 
     expect(page.page, pageNumber);
     expect(page.size, page.elements.length);
+  });
+
+  test('FindUsersUseCase - find By name', () async {
+    final FindUsersUseCase usecase = getIt<FindUsersUseCase>();
+     final page = await usecase.findByName('Tolstoi');
+
+    expect(page.page, 1);
+    expect(page.elements.length, 2);
+  });
+
+  test('FindUsersUseCase - find By email', () async {
+    final FindUsersUseCase usecase = getIt<FindUsersUseCase>();
+    final page = await usecase.findByEmail('@yandex.ru');
+
+    expect(page.page, 1);
+    expect(page.elements.length, 4);
   });
 }

@@ -1,0 +1,84 @@
+@startuml
+'https://plantuml.com/class-diagram
+Title Diagram class of domain package
+header Updated by Anderson Guiera\non October, 19th 2021
+
+note as package_indicators
+Domain package
+
+|= indicator |= description |= value |
+| Nc | number of classes | 13 |
+| Na | number of abstract classes | 11 |
+| A | level of abstraction\n <math>A=Na/Nc</math> | 0.85 |
+end note
+
+namespace domain {
+    namespace model {
+        class User{
+            +final dynamic id
+            +final String name
+            +final String email
+            +final String gender
+            +final String status
+            +{static} User empty
+
+            +User copyWith({String? name, String? email, String? gender, String? status})
+        }
+
+        class Paginated<T> {
+            +final int total
+            +final int size
+            +final int pages
+            +final int page
+            +final List<T> elements
+        }
+    }
+
+    namespace repository {
+        interface UserRepository {
+            +Future<Paginated<User>> getUsers({int? page})
+            +Future<User> getUser(dynamic id)
+            +Future<User> saveUser(User user)
+            +Future<void> deleteUser(dynamic id)
+            +Future<Paginated<User>> findByName(String name, {int page = 1})
+            +Future<Paginated<User>> findByEmail(String email, {int page = 1})
+        }
+    }
+
+    namespace exceptions {
+        interface DomainException implements dart.core.Exception{
+          String get fancyMessage;
+          String get completeMessage;
+          StackTrace? get stackTrace;
+        }
+        interface UnauthorisedException implements DomainException
+        interface ForbiddenException implements DomainException
+        interface NotFoundException implements DomainException
+        interface IOException extends DomainException
+    }
+
+    namespace usecase {
+        namespace common {
+            interface FindByNameUseCase<T> {
+                +Future<Paginated<T>> findByName(String name, {int page = 1})
+            }
+
+            interface FindByEmailUseCase<T> {
+                +Future<Paginated<T>> findByEmail(String email, {int page = 1})
+            }
+        }
+        namespace user {
+            interface GetUserByIdUseCase {
+                +Future<User> getUser(dynamic id)
+            }
+
+            interface GetUsersByPageUseCase {
+                +Future<Paginated<User>> getUsers({int? page})
+            }
+
+            interface FindUsersUseCase implements domain.usecase.common.FindByNameUseCase, domain.usecase.common.FindByEmailUseCase
+        }
+    }
+}
+
+@enduml

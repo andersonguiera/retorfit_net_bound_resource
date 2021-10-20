@@ -1,0 +1,35 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+component domain {
+  [usecase]
+  [repository]
+  [model]
+  [exceptions]
+}
+
+component data {
+  component datasource {
+    [remote] - HTTP
+  }
+  [repository_impl]
+  [mapper]
+
+  repository_impl --> remote
+  repository_impl --> exceptions
+}
+
+component usecase_impl {
+    [user]
+}
+
+'Relations between data and domain
+repository_impl --> repository
+repository_impl --> model
+mapper --> model
+
+'Relations between usecase_impl and domain
+user -> usecase
+
+
+@enduml

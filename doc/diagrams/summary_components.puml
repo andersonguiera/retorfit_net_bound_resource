@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/component-diagram
+Title Summary of system components
+header Updated by Anderson Guiera\non October, 19th 2021
+note as package_indicators
+App
+
+|= package |= indicator |= value |
+| data | fan-in  | 0 |
+| data | fan-out  | 1 |
+| data | instability  | 1 |
+| data | level of abstraction  | 0.03 |
+| data | distance of main sequence  | 0.03 |
+| domain | fan-in  | 1 |
+| domain | fan-out  | 0 |
+| domain | instability  | 0 |
+| domain | level of abstraction  | 0.85 |
+| domain | distance of main sequence  | 0.15 |
+| usecase | fan-in  | 0 |
+| usecase | fan-out  | 1 |
+| usecase | instability  | 1 |
+| usecase | level of abstraction  | 0 |
+| usecase | distance of main sequence  | 0 |
+
+Instability:
+<math> I = fan_out / (fan_in + fan_out)</math>
+
+Distance of main sequence:
+<math> D = |A+I-1|</math>
+end note
+
+package App {
+    component business {
+        [domain]
+        [usecase]
+        [data]
+        data->domain
+        usecase -> domain
+    }
+}
+
+@enduml
