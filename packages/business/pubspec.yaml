@@ -1,4 +1,4 @@
-name: presentation
+name: business
 description: A new Flutter package project.
 version: 0.0.1
 homepage:
@@ -10,20 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  #injectable: any
-  #domain:
-  #  path: ../business/domain
-  #data:
-  #  path: ../business/data
-  #usecase:
-  #  path: ../business/usecase
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  flutter_test:
+    sdk: flutter
   flutter_lints: ^1.0.0
-  injectable_generator: any
-  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -1,0 +1,22 @@
+name: data
+description: A new Flutter package project.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  domain:
+    path: ../domain
+  retrofit: any
+  injectable: any
+  get_it: any
+
+dev_dependencies:
+  test: any
+  flutter_lints: any
+  retrofit_generator: any
+  json_serializable: any
+  injectable_generator: any
+  build_runner: any

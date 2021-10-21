@@ -1,29 +1,23 @@
-name: presentation
+name: domain
 description: A new Flutter package project.
 version: 0.0.1
 homepage:
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.17.0"
+  #flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  #injectable: any
-  #domain:
-  #  path: ../business/domain
-  #data:
-  #  path: ../business/data
-  #usecase:
-  #  path: ../business/usecase
+  #flutter:
+  #  sdk: flutter
+  equatable: any
+
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  #flutter_test:
+  #  sdk: flutter
+  test: any
   flutter_lints: ^1.0.0
-  injectable_generator: any
-  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
