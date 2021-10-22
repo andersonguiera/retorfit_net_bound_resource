@@ -14,7 +14,8 @@ class MockUserRepository implements UserRepository {
       const User(2, 'Lev Tolstoi', 'tolstoi@xpto.com.br', 'male', 'active'),
       const User(
           3, 'Mikhail Lermontov', 'piechorin@xpto.com.br', 'male', 'inactive'),
-      const User(4, 'Ilia Tolstoi', 'ilia_the_son@xpto.com.br', 'male', 'active')
+      const User(
+          4, 'Ilia Tolstoi', 'ilia_the_son@xpto.com.br', 'male', 'active')
     ]);
 
     for (var name in names) {
@@ -66,11 +67,13 @@ class MockUserRepository implements UserRepository {
   }
 
   Paginated<User> _getPaginatedElements(int? page, List<User> elements) {
+    var threshold = 20;
     var total = elements.length;
-    var offset = elements.length < 20 ? elements.length : 20;
-    var pages = total == 0 ? 1: total ~/ 20 + (total%20 > 0 ? 1 : 0);
+    var offset = total < threshold ? total : threshold;
+    var pages =
+        total == 0 ? 1 : total ~/ threshold + (total % threshold > 0 ? 1 : 0);
     var start = ((page ?? 1) - 1) * offset;
-    var end = start + offset <= elements.length ? start + offset : elements.length;
+    var end = start + offset <= total ? start + offset : total;
     var size = end - start;
     return Paginated(
         total: total,

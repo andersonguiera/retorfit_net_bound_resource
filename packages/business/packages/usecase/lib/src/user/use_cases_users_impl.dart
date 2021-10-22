@@ -58,40 +58,21 @@ class GetAllUsersImp implements GetAllUsers {
 
     users.addAll(firstPage.elements);
 
-    final callsForPackage = 10;
-    int totalPackages = (firstPage.pages -1) ~/ callsForPackage;
-    //int totalPagesMock = 12;
-    //int totalPackages = (totalPagesMock - 1) ~/ callsForPackage;
+    var manager = CallsManager<Paginated<User>>(
+        firstPage.page + 1,
+        firstPage.pages,
+        (page) async => await _repository.getUsers(page: page));
 
-    List<PackageOfCalls> packages = [];
+    manager.prepare();
 
-    var last = 0;
-    for (int i = 0; i < totalPackages; i++) {
-      var first = i * callsForPackage + 2;
-      last = first + callsForPackage - 1;
-      packages.add(PackageOfCalls<Paginated<User>>(
-          first, last, (page) async => await _repository.getUsers(page: page)));
-      //print(package.range);
-    }
-    if (last < firstPage.pages) {
-      //last == 0, less then 'callsForPackage' pages
-      var first = last == 0 ? last + 2 : last + 1;
-      last = firstPage.pages;
-      packages.add(PackageOfCalls<Paginated<User>>(
-          first, last, (page) async => await _repository.getUsers(page: page)));
-      //print(package.range);
-    }
+    var results = await manager.calls();
 
-    for(var package in packages) {
-      var resultCalls = await package.call();
-
-      for(var page in resultCalls) {
-        users.addAll((page as Paginated<User>).elements);
-      }
+    for (var result in results) {
+      users.addAll(result.elements);
     }
 
     return users.toList().cast();
-  }
+ }
 }
 
 class PackageOfCalls<T> {
@@ -99,15 +80,49 @@ class PackageOfCalls<T> {
   final int last;
   late final List<int> range;
   final Future<T> Function(int order) future;
-  late final List<Future<T>> calls;
+  late final List<Future<T> Function()> calls;
 
   PackageOfCalls(this.first, this.last, this.future) {
     var length = last - first + 1;
     range = List.generate(length, (index) => index + first);
-    calls = List.generate(length, (index) => future(range[index]));
+    calls = List.generate(length, (index) => () => future(range[index]));
   }
 
   Future<List<T>> call() async {
-    return Future.wait(calls);
+    print('$first-$last');
+    return Future.wait(calls.map((e) => e.call()).toList());
+  }
+}
+
+class CallsManager<T> {
+  int first;
+  int last;
+  int threshold;
+  final Future<T> Function(int order) future;
+  late final List<PackageOfCalls<T>> packages;
+
+  CallsManager(this.first, this.last, this.future, [this.threshold = 10]);
+
+  void prepare() {
+    int totalCalls = last - first + 1;
+    int totalPackages =
+        totalCalls ~/ threshold + (totalCalls % threshold > 0 ? 1 : 0);
+    List<int> firsts =
+        List.generate(totalPackages, (index) => index * threshold + first);
+    List<int> lasts =
+        List.generate(totalPackages, (index) => firsts[index] + threshold - 1);
+    lasts[lasts.length - 1] =
+        lasts[lasts.length - 1] > last ? last : lasts[lasts.length - 1];
+
+    packages = List.generate(totalPackages,
+        (index) => PackageOfCalls<T>(firsts[index], lasts[index], (order) => future(order)));
+  }
+
+  Future<List<T>> calls() async {
+    List<T> resultCalls = [];
+    for (var package in packages) {
+      resultCalls.addAll(await package.call());
+    }
+    return resultCalls;
   }
 }
