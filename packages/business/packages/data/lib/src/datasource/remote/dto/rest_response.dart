@@ -9,7 +9,7 @@ class Links {
   const Links(this.current, {this.previous, this.next});
 
   final String? previous;
-  final String current;
+  final String? current;
   final String? next;
 
   factory Links.fromJson(Map<String, dynamic> json) =>

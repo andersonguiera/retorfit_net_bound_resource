@@ -19,8 +19,8 @@ class UserRepositoryRemoteImpl implements UserRepository {
     try {
       var response = await _service.getUsers(page ?? 1);
       return _generatePaginateReturn(response);
-    } catch (error) {
-      throw _handleError(error, StackTrace.current);
+    } catch (error, stacktrace) {
+      throw _handleError(error, stacktrace);
     }
   }
 
@@ -29,8 +29,8 @@ class UserRepositoryRemoteImpl implements UserRepository {
     try {
       var response = await _service.getUser(id);
       return response.data.toModel();
-    } catch (error) {
-      throw _handleError(error, StackTrace.current);
+    } catch (error, stacktrace) {
+      throw _handleError(error, stacktrace);
     }
   }
 
@@ -41,16 +41,16 @@ class UserRepositoryRemoteImpl implements UserRepository {
       try {
         var response = await _service.createUser(user.toDTO());
         return response.data.toModel();
-      } catch (error) {
-        throw _handleError(error, StackTrace.current);
+      } catch (error, stacktrace) {
+        throw _handleError(error, stacktrace);
       }
     } else {
       // atualiza um user existente
       try {
         var response = await _service.updateUser(user.id, user.toDTO());
         return response.data.toModel();
-      } catch (error) {
-        throw _handleError(error, StackTrace.current);
+      } catch (error, stacktrace) {
+        throw _handleError(error, stacktrace);
       }
     }
   }
@@ -59,8 +59,8 @@ class UserRepositoryRemoteImpl implements UserRepository {
   Future<void> deleteUser(dynamic id) async {
     try {
       await _service.deleteUser(id);
-    } catch (error) {
-      throw _handleError(error, StackTrace.current);
+    } catch (error, stacktrace) {
+      throw _handleError(error, stacktrace);
     }
   }
 
@@ -69,8 +69,8 @@ class UserRepositoryRemoteImpl implements UserRepository {
     try {
       var response = await _service.findByName(name, page);
       return _generatePaginateReturn(response);
-    } catch (error) {
-      throw _handleError(error, StackTrace.current);
+    } catch (error, stacktrace) {
+      throw _handleError(error, stacktrace);
     }
   }
 
@@ -79,8 +79,8 @@ class UserRepositoryRemoteImpl implements UserRepository {
     try {
       var response = await _service.findByEmail(email, page);
       return _generatePaginateReturn(response);
-    } catch (error) {
-      throw _handleError(error,StackTrace.current);
+    } catch (error, stacktrace) {
+      throw _handleError(error, stacktrace);
     }
   }
 
@@ -118,6 +118,7 @@ class UserRepositoryRemoteImpl implements UserRepository {
   }
 
   DomainException _handleError(Object error, StackTrace stackTrace) {
+    print(stackTrace);
     if (error is DioError) {
       return _handleDioError(error, stackTrace);
     } else {

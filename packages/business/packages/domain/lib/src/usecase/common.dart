@@ -1,18 +1,4 @@
-import 'package:domain/domain.dart';
 
-abstract class FindByNameUseCase<T> {
-  Future<Paginated<T>> findByName(String name, {int page = 1});
-}
-
-abstract class FindByEmailUseCase<T> {
-  Future<Paginated<T>> findByEmail(String email, {int page = 1});
-}
-
-abstract class GetAll<T> {
-  Future<List<T>> getAll();
-}
-
-//Não apagar daqui para baixo
 class UseCaseResponse<T> {
   UseCaseResponse(this.payload);
 
@@ -50,17 +36,17 @@ abstract class BaseUseCaseRequestResponseTyped<R, T> implements BaseUseCaseAnyPa
 
 }
 
-abstract class FindByName2<R, T>
+abstract class FindByName<R, T>
     implements BaseUseCaseRequestResponseTyped<R,T> {}
 
-abstract class FindByNameString2<T>
+abstract class FindByNameString<T>
     implements BaseUseCaseAnyParam<String, UseCaseResponse<T>> {}
 
-abstract class FindByEmail2<R, T>
+abstract class FindByEmail<R, T>
     implements BaseUseCaseRequestResponseTyped<R, T> {}
 
-abstract class FindByEmailString2<T>
+abstract class FindByEmailString<T>
     implements BaseUseCaseAnyParam<String, UseCaseResponse<T>> {}
 
-abstract class FindById2<T>
+abstract class GetById<T>
     implements BaseUseCaseAnyParam<dynamic, UseCaseResponse<T>> {}

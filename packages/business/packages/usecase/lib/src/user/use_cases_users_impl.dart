@@ -3,226 +3,7 @@ import 'package:domain/usecase.dart';
 
 import 'package:injectable/injectable.dart';
 import 'package:usecase/src/di/locator.dart';
-
-@Injectable(as: GetUserByIdUseCase)
-class GetUserByIdUseCaseImpl implements GetUserByIdUseCase {
-  GetUserByIdUseCaseImpl(this._repository);
-
-  final UserRepository _repository;
-
-  @override
-  Future<User> getUser(dynamic id) async {
-    return _repository.getUser(id);
-  }
-}
-
-@Injectable(as: GetUsersByPageUseCase)
-class GetUsersByPageUseCaseImpl implements GetUsersByPageUseCase {
-  GetUsersByPageUseCaseImpl(this._repository);
-
-  final UserRepository _repository;
-
-  @override
-  Future<Paginated<User>> getUsers({int? page}) async {
-    return await _repository.getUsers(page: page);
-  }
-}
-
-@Injectable(as: FindUsersUseCase)
-class FindUsersUseCaseImpl implements FindUsersUseCase {
-  FindUsersUseCaseImpl(this._repository);
-
-  final UserRepository _repository;
-
-  @override
-  Future<Paginated<User>> findByName(String name, {int page = 1}) async {
-    return await _repository.findByName(name, page: page);
-  }
-
-  @override
-  Future<Paginated<User>> findByEmail(String email, {int page = 1}) async {
-    return await _repository.findByEmail(email, page: page);
-  }
-}
-
-@Injectable(as: GetAllUsers)
-class GetAllUsersImp implements GetAllUsers {
-  GetAllUsersImp(this._repository);
-
-  final UserRepository _repository;
-
-  @override
-  Future<List<User>> getAll() async {
-    Set users = <User>{};
-
-    final firstPage = await _repository.getUsers();
-
-    users.addAll(firstPage.elements);
-
-    var manager = CallsManager<Paginated<User>>(
-        firstPage.page + 1,
-        firstPage.pages,
-        (page) async => await _repository.getUsers(page: page));
-
-    manager.prepare();
-
-    var results = await manager.calls();
-
-    for (var result in results) {
-      users.addAll(result.elements);
-    }
-
-    if (manager.isError) {
-      int lastErrorCount;
-      do {
-        lastErrorCount = manager.countErrors;
-        //if (manager.isError) {
-        var results = await manager.calls();
-        for (var result in results) {
-          users.addAll(result.elements);
-          //}
-        }
-      } while (manager.isError && manager.countErrors < lastErrorCount);
-    }
-
-    return users.toList().cast();
-  }
-}
-
-@Injectable(as: CreateUserUseCase)
-class CreateUserUseCaseImpl implements CreateUserUseCase {
-  CreateUserUseCaseImpl(this._repository) {
-    _findUsersUseCase = getIt<FindUsersUseCase>();
-  }
-
-  late final FindUsersUseCase _findUsersUseCase;
-  final UserRepository _repository;
-
-  @override
-  Future<User> create(User user) async {
-    var page = await _findUsersUseCase.findByEmail(user.email);
-
-    if (_notFound(page)) {
-      return await _repository.saveUser(user);
-    }
-    return User.empty;
-  }
-
-  bool _notFound(Paginated page) {
-    return page.total == 0;
-  }
-}
-
-enum StateCalls { idle, processing, finish, error }
-
-class PackageOfCalls<T> {
-  final int first;
-  final int last;
-  late final List<int> range;
-  final Future<T> Function(int order) future;
-  late List<Future<T> Function()> calls;
-  StateCalls state = StateCalls.idle;
-
-  PackageOfCalls(this.first, this.last, this.future) {
-    var length = last - first + 1;
-    range = List.generate(length, (index) => index + first);
-    calls = List.generate(length, (index) => () => future(range[index]));
-  }
-
-  Future<List<T>> call() async {
-    List<T> results = [];
-    List<Future<T> Function()> successCalls = [];
-    print('$first-$last');
-    state = StateCalls.processing;
-    await Future.wait(calls
-            .map((e) => e.call().then((value) {
-                  print('Success: ${(value as Paginated).page}');
-                  results.add(value);
-                  successCalls.add(e);
-                }))
-            .toList())
-        .then((value) {
-      state = StateCalls.finish;
-    }).onError((error, stackTrace) {
-      state = StateCalls.error;
-    });
-
-    for (var success in successCalls) {
-      calls.remove(success);
-    }
-
-    return results;
-  }
-
-  bool get isFinish => state == StateCalls.finish;
-
-  bool get isError => state == StateCalls.error;
-
-  int get totalFinish => last - first + 1 - totalErrors;
-
-  int get totalErrors => calls.length;
-}
-
-class CallsManager<T> {
-  int first;
-  int last;
-  int threshold;
-  final Future<T> Function(int order) future;
-  late final List<PackageOfCalls<T>> packages;
-
-  CallsManager(this.first, this.last, this.future, [this.threshold = 10]);
-
-  void prepare() {
-    int totalCalls = last - first + 1;
-    int totalPackages =
-        totalCalls ~/ threshold + (totalCalls % threshold > 0 ? 1 : 0);
-    List<int> firsts =
-        List.generate(totalPackages, (index) => index * threshold + first);
-    List<int> lasts =
-        List.generate(totalPackages, (index) => firsts[index] + threshold - 1);
-    lasts[lasts.length - 1] =
-        lasts[lasts.length - 1] > last ? last : lasts[lasts.length - 1];
-
-    packages = List.generate(
-        totalPackages,
-        (index) => PackageOfCalls<T>(
-            firsts[index], lasts[index], (order) => future(order)));
-  }
-
-  Future<List<T>> calls() async {
-    List<T> results = [];
-    await _callList(packages).then((value) => results = value);
-    print(
-        'Errors: ${packages.map((e) => e.totalErrors).reduce((value, element) => value + element)}');
-    return results;
-  }
-
-  Future<List<T>> _callList(List<PackageOfCalls<T>> list) async {
-    List<T> resultCalls = [];
-    for (var package in list) {
-      resultCalls.addAll(await package.call());
-    }
-    return resultCalls;
-  }
-
-  bool get isFinish => packages
-      .map((e) => e.isFinish)
-      .reduce((value, element) => value && element);
-
-  bool get isError => packages
-      .map((e) => e.isError)
-      .reduce((value, element) => value || element);
-
-  int get countErrors => packages
-      .map((e) => e.totalErrors)
-      .reduce((value, element) => value + element);
-
-  int get countSuccess => packages
-      .map((e) => e.totalFinish)
-      .reduce((value, element) => value + element);
-}
-
-//Outra abordagem
+import './call_manager.dart';
 
 abstract class UserUseCasesWithUserRepo {
   UserUseCasesWithUserRepo(this._repository);
@@ -230,10 +11,9 @@ abstract class UserUseCasesWithUserRepo {
   final UserRepository _repository;
 }
 
-//OK
-@Injectable(as: FindUserById2)
+@Injectable(as: GetUserById)
 class FindUserByIdImpl2 extends UserUseCasesWithUserRepo
-    implements FindUserById2 {
+    implements GetUserById {
   FindUserByIdImpl2(UserRepository repository) : super(repository);
 
   @override
@@ -243,10 +23,9 @@ class FindUserByIdImpl2 extends UserUseCasesWithUserRepo
   }
 }
 
-//OK
-@Injectable(as: FindUserByNameUserParam2)
+@Injectable(as: FindUserByNameUserParam)
 class FindUserByNameUseCaseImpl2 extends UserUseCasesWithUserRepo
-    implements FindUserByNameUserParam2 {
+    implements FindUserByNameUserParam {
   FindUserByNameUseCaseImpl2(UserRepository repository) : super(repository);
 
   @override
@@ -258,10 +37,9 @@ class FindUserByNameUseCaseImpl2 extends UserUseCasesWithUserRepo
   }
 }
 
-//ok
-@Injectable(as: FindUserByNameStringParam2)
+@Injectable(as: FindUserByNameStringParam)
 class FindUserByNameStringParamImpl2 extends UserUseCasesWithUserRepo
-    implements FindUserByNameStringParam2 {
+    implements FindUserByNameStringParam {
   FindUserByNameStringParamImpl2(UserRepository repository) : super(repository);
 
   @override
@@ -271,10 +49,9 @@ class FindUserByNameStringParamImpl2 extends UserUseCasesWithUserRepo
   }
 }
 
-//OK
-@Injectable(as: FindUserByNamePageRequestParam2)
+@Injectable(as: FindUserByNamePageRequestParam)
 class FindUserByNamePageRequestParam2Impl extends UserUseCasesWithUserRepo
-    implements FindUserByNamePageRequestParam2 {
+    implements FindUserByNamePageRequestParam {
   FindUserByNamePageRequestParam2Impl(UserRepository repository)
       : super(repository);
 
@@ -287,10 +64,9 @@ class FindUserByNamePageRequestParam2Impl extends UserUseCasesWithUserRepo
   }
 }
 
-//OK
-@Injectable(as: FindUserByEmailUserParam2)
+@Injectable(as: FindUserByEmailUserParam)
 class FindUserByEmailUserParamImpl2 extends UserUseCasesWithUserRepo
-    implements FindUserByEmailUserParam2 {
+    implements FindUserByEmailUserParam {
   FindUserByEmailUserParamImpl2(UserRepository repository) : super(repository);
 
   @override
@@ -302,10 +78,9 @@ class FindUserByEmailUserParamImpl2 extends UserUseCasesWithUserRepo
   }
 }
 
-//ok
-@Injectable(as: FindUserByEmailStringParam2)
+@Injectable(as: FindUserByEmailStringParam)
 class FindUserByEmailStringParamImpl2 extends UserUseCasesWithUserRepo
-    implements FindUserByEmailStringParam2 {
+    implements FindUserByEmailStringParam {
   FindUserByEmailStringParamImpl2(UserRepository repository)
       : super(repository);
 
@@ -316,10 +91,9 @@ class FindUserByEmailStringParamImpl2 extends UserUseCasesWithUserRepo
   }
 }
 
-//ok
-@Injectable(as: FindUserByEmailPageRequestParam2)
+@Injectable(as: FindUserByEmailPageRequestParam)
 class FindUserByEmailPageRequestParam2Impl extends UserUseCasesWithUserRepo
-    implements FindUserByEmailPageRequestParam2 {
+    implements FindUserByEmailPageRequestParam {
   FindUserByEmailPageRequestParam2Impl(UserRepository repository)
       : super(repository);
 
@@ -332,11 +106,11 @@ class FindUserByEmailPageRequestParam2Impl extends UserUseCasesWithUserRepo
   }
 }
 
-@Injectable(as: CreateUserUseCase2)
-class CreateUserUseCaseImpl2 extends UserUseCasesWithUserRepo implements CreateUserUseCase2{
+@Injectable(as: CreateUserUseCase)
+class CreateUserUseCaseImpl2 extends UserUseCasesWithUserRepo implements CreateUserUseCase{
   CreateUserUseCaseImpl2(UserRepository repository) : super(repository);
 
-  final FindUserByEmailStringParam2 _findUsersUseCase = getIt<FindUserByEmailStringParam2>();
+  final FindUserByEmailStringParam _findUsersUseCase = getIt<FindUserByEmailStringParam>();
 
   @override
   Future<UseCaseResponse<User>> perform(User request) async {
@@ -354,8 +128,8 @@ class CreateUserUseCaseImpl2 extends UserUseCasesWithUserRepo implements CreateU
   }
 }
 
-@Injectable(as: GetAllUsers2)
-class GetAllUsers2Impl extends UserUseCasesWithUserRepo implements GetAllUsers2 {
+@Injectable(as: GetAllUsers)
+class GetAllUsers2Impl extends UserUseCasesWithUserRepo implements GetAllUsers {
   GetAllUsers2Impl(UserRepository repository) : super(repository);
 
   @override
@@ -393,6 +167,18 @@ class GetAllUsers2Impl extends UserUseCasesWithUserRepo implements GetAllUsers2 
     }
 
     return UseCaseResponse(users.toList().cast());
+  }
+
+}
+
+@Injectable(as: GetUsersByPage)
+class GetUsersByPageImpl extends UserUseCasesWithUserRepo implements GetUsersByPage {
+  GetUsersByPageImpl(UserRepository repository) : super(repository);
+
+  @override
+  Future<UseCaseResponse<Paginated<User>>> perform(int page) async {
+    var responsePage = await _repository.getUsers(page: page);
+    return UseCaseResponse(responsePage);
   }
 
 }

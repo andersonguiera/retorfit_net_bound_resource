@@ -7,7 +7,7 @@ part of 'rest_response.dart';
 // **************************************************************************
 
 Links _$LinksFromJson(Map<String, dynamic> json) => Links(
-      json['current'] as String,
+      json['current'] as String?,
       previous: json['previous'] as String?,
       next: json['next'] as String?,
     );
