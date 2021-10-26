@@ -86,8 +86,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
                 method: 'POST',
                 headers: <String, dynamic>{
                   r'Content-Type': 'application/json',
-                  r'Authorization':
-                      'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+                  r'Authorization': 'Bearer '
                 },
                 extra: _extra,
                 contentType: 'application/json')
@@ -109,8 +108,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
                 method: 'PATCH',
                 headers: <String, dynamic>{
                   r'Content-Type': 'application/json',
-                  r'Authorization':
-                      'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+                  r'Authorization': 'Bearer '
                 },
                 extra: _extra,
                 contentType: 'application/json')
@@ -130,8 +128,7 @@ class _UserRepositoryRemoteServices implements UserRepositoryRemoteServices {
             method: 'DELETE',
             headers: <String, dynamic>{
               r'Content-Type': 'application/json',
-              r'Authorization':
-                  'Bearer 14a842a38e579f2320b377dab8f8e17ec59a19993c28c9c15b505021efc4f74b'
+              r'Authorization': 'Bearer '
             },
             extra: _extra,
             contentType: 'application/json')

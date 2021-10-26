@@ -46,9 +46,13 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
-  Future<User> saveUser(User user) {
-    // TODO: implement saveUser
-    throw UnimplementedError();
+  Future<User> saveUser(User user) async {
+    List ids = elements.map((e) => e.id).toList()..sort((a, b) => a > b ? 1 : (a < b ? -1 : 0 ));
+
+    var newId = ids.last + 1;
+    var newUser = User(newId, user.name, user.email, user.gender, user.status);
+
+    return newUser;
   }
 
   @override
